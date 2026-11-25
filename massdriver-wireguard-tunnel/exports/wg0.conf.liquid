@@ -1,0 +1,22 @@
+{%- assign interface = artifact.payload.interface -%}
+[Interface]
+PrivateKey = {{ interface.private_key }}
+Address = {{ interface.address | join: ", " }}
+{%- if interface.dns.size > 0 %}
+DNS = {{ interface.dns | join: ", " }}
+{%- endif %}
+{%- if interface.mtu %}
+MTU = {{ interface.mtu }}
+{%- endif %}
+{% for peer in artifact.payload.peers %}
+[Peer]
+PublicKey = {{ peer.public_key }}
+{%- if peer.preshared_key %}
+PresharedKey = {{ peer.preshared_key }}
+{%- endif %}
+Endpoint = {{ peer.endpoint }}
+AllowedIPs = {{ peer.allowed_ips | join: ", " }}
+{%- if peer.persistent_keepalive %}
+PersistentKeepalive = {{ peer.persistent_keepalive }}
+{%- endif %}
+{% endfor -%}

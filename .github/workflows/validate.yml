@@ -1,0 +1,47 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
+          version-type: strict
+
+      - name: Download the resource type metaschema
+        run: curl -fsSL https://api.massdriver.cloud/json-schemas/resource-type.json -o "$RUNNER_TEMP/resource-type.json"
+
+      - name: Validate resource types and render exports
+        run: elixir scripts/validate.exs "$RUNNER_TEMP/resource-type.json" "$RUNNER_TEMP/rendered"
+
+      - name: Load rendered kubeconfigs with kubectl
+        run: |
+          for file in "$RUNNER_TEMP"/rendered/*/*/kubeconfig.yaml; do
+            echo "$file"
+            kubectl config view --kubeconfig "$file" --raw -o json > /dev/null
+          done
+
+      - name: Load rendered WireGuard configs into a WireGuard interface
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q wireguard-tools
+          sudo ip link add wg-validate type wireguard
+          for file in "$RUNNER_TEMP"/rendered/*/*/wg0.conf; do
+            echo "$file"
+            # Example endpoints use documentation hostnames that do not resolve.
+            sed -E 's/^Endpoint = [A-Za-z][^:]*:/Endpoint = 192.0.2.1:/' "$file" > "$RUNNER_TEMP/wg-validate.conf"
+            sudo wg-quick strip "$RUNNER_TEMP/wg-validate.conf" > "$RUNNER_TEMP/wg-stripped.conf"
+            sudo wg setconf wg-validate "$RUNNER_TEMP/wg-stripped.conf"
+          done
+          sudo ip link delete wg-validate

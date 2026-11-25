@@ -1,0 +1,64 @@
+name: massdriver-service-account
+version: 0.1.0
+label: Massdriver Service Account
+icon: https://raw.githubusercontent.com/massdriver-cloud/massdriver-resource-types/main/massdriver-service-account/icon.svg
+
+ui:
+  connectionOrientation: link
+  instructions:
+    - label: Create a service account
+      path: ./instructions/create-service-account.md
+    - label: Grant access with policies
+      path: ./instructions/grant-access.md
+
+schema:
+  title: Massdriver Service Account
+  description: >-
+    Credentials of a Massdriver service account. A bundle uses them to manage Massdriver with the
+    Massdriver CLI, the Go SDK, or the Terraform provider. Each field has the name of the provider
+    argument, and maps to one environment variable.
+  type: object
+  additionalProperties: false
+  required:
+    - url
+    - organization_id
+    - api_key
+  examples:
+    - url: https://api.massdriver.cloud
+      organization_id: acme
+      api_key: md_Zm9vYmFyYmF6cXV4cXV1eGNvcmdlZ3JhdWx0Z2FycGx5
+  properties:
+    url:
+      title: API URL
+      description: >-
+        Base URL of the Massdriver API, with the scheme and the host. Massdriver Cloud uses
+        `https://api.massdriver.cloud`. A self-hosted installation uses its own URL. Sets
+        `MASSDRIVER_URL`.
+      type: string
+      pattern: ^https?://[^/?#\s]+[^\s]*$
+      default: https://api.massdriver.cloud
+      examples:
+        - https://api.massdriver.cloud
+        - https://massdriver.example.com
+    organization_id:
+      title: Organization ID
+      description: >-
+        Identifier of the organization that the service account belongs to, such as `acme`. It is
+        the short identifier in the organization's URLs, not a UUID. Sets
+        `MASSDRIVER_ORGANIZATION_ID`.
+      type: string
+      minLength: 2
+      maxLength: 64
+      pattern: ^[a-z0-9-]+$
+      examples:
+        - acme
+    api_key:
+      $md.sensitive: true
+      title: API key
+      description: >-
+        Access token of the service account. It starts with `md_`. Massdriver shows the token one
+        time, when you create it. Sets `MASSDRIVER_API_KEY`.
+      type: string
+      pattern: ^md_[A-Za-z0-9_-]+$
+      examples:
+        - md_Zm9vYmFyYmF6cXV4cXV1eGNvcmdlZ3JhdWx0Z2FycGx5

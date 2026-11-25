@@ -1,0 +1,118 @@
+name: massdriver-event-destination-https
+version: 0.1.0
+label: Event Destination (HTTPS)
+icon: https://raw.githubusercontent.com/massdriver-cloud/massdriver-resource-types/main/massdriver-event-destination-https/icon.svg
+
+ui:
+  connectionOrientation: link
+  instructions:
+    - label: Create an event destination
+      path: ./instructions/create-destination.md
+    - label: Verify signatures
+      path: ./instructions/verify-signatures.md
+
+schema:
+  title: Event Destination (HTTPS)
+  description: >-
+    A Massdriver event destination with the HTTP adapter and an HTTPS URL. Massdriver posts each
+    selected audit log event to the URL as a CloudEvent, signed with Standard Webhooks headers. A
+    bundle that runs the receiver uses this resource to get the URL and the signing secret.
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - name
+    - url
+    - signing_secret
+    - event_types
+    - attributes
+  examples:
+    - id: 4f9b2c1e-8d3a-4c6e-9f1b-2a7d5e8c0b13
+      name: Production deployments
+      url: https://hooks.example.com/massdriver
+      signing_secret: whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw3RpS9V6Gg9Q=
+      event_types:
+        - deployment.completed
+        - deployment.failed
+      attributes:
+        md-environment: prod
+      condition: .data.metadata.deployment_action == "PROVISION"
+    - id: 0c7e2a9d-1b4f-4e8a-a3d6-5f9b8c2e1d47
+      name: Audit log to SIEM
+      url: https://siem.example.com/ingest/massdriver
+      signing_secret: whsec_C2FsdGVkX19hYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5
+      event_types: []
+      attributes: {}
+  properties:
+    id:
+      title: ID
+      description: The ID of the event destination in Massdriver, a UUID.
+      type: string
+      pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+      examples:
+        - 4f9b2c1e-8d3a-4c6e-9f1b-2a7d5e8c0b13
+    name:
+      title: Name
+      description: The name of the destination. It is unique in the organization.
+      type: string
+      minLength: 1
+      examples:
+        - Production deployments
+    url:
+      title: URL
+      description: >-
+        The URL that receives the events. It must start with `https://` and include a host.
+        Massdriver refuses hosts with private addresses.
+      type: string
+      pattern: ^https://[^/?#\s]+[^\s]*$
+      examples:
+        - https://hooks.example.com/massdriver
+    signing_secret:
+      $md.sensitive: true
+      title: Signing secret
+      description: >-
+        The secret that signs each request, `whsec_` followed by base64. The receiver uses it to
+        check the `webhook-signature` header. Massdriver creates it with the destination.
+      type: string
+      pattern: ^whsec_[A-Za-z0-9+/]+={0,2}$
+    event_types:
+      title: Event types
+      description: >-
+        The event types that the destination receives, such as `deployment.failed`, or
+        `<entity>.*` for every event of an entity, such as `deployment.*`. An empty list receives
+        every event.
+      type: array
+      uniqueItems: true
+      items:
+        type: string
+        pattern: ^[a-z][a-z0-9_]*\.([a-z][a-z0-9_]*|\*)$
+      examples:
+        - - deployment.completed
+          - deployment.failed
+        - - instance.*
+          - resource.*
+    attributes:
+      title: Attributes
+      description: >-
+        Attribute values that the entity of an event must have had, such as
+        `{"md-environment": "prod"}`. An event must have all of them. An empty object receives
+        events with any attributes, and events with no attributes.
+      type: object
+      propertyNames:
+        minLength: 1
+      additionalProperties:
+        type: string
+      examples:
+        - md-environment: prod
+        - md-project: api
+          md-component: database
+    condition:
+      title: Condition
+      description: >-
+        A jq expression that Massdriver runs on each CloudEvent that `event_types` and `attributes`
+        select. Massdriver sends the event only when the expression outputs `true`. Empty sends
+        every selected event.
+      type: string
+      examples:
+        - .data.metadata.deployment_action == "PROVISION"
+        - .data.attributes["md-environment"] == "prod" or .data.attributes["md-environment"] == "staging"

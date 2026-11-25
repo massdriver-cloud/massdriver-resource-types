@@ -1,0 +1,274 @@
+name: massdriver-kubernetes-cluster
+version: 0.1.0
+label: Kubernetes Cluster
+icon: https://raw.githubusercontent.com/massdriver-cloud/massdriver-resource-types/main/massdriver-kubernetes-cluster/icon.svg
+
+ui:
+  connectionOrientation: link
+  instructions:
+    - label: Service account token (kubectl)
+      path: ./instructions/service-account-token.md
+    - label: Amazon EKS
+      path: ./instructions/eks.md
+    - label: Google GKE
+      path: ./instructions/gke.md
+    - label: Azure AKS
+      path: ./instructions/aks.md
+
+exports:
+  - downloadButtonText: kubeconfig
+    fileFormat: yaml
+    templatePath: ./exports/kubeconfig.yaml.liquid
+    templateLang: liquid
+
+schema:
+  title: Kubernetes Cluster
+  description: >-
+    Access to a Kubernetes API server. The fields use the names and formats of a kubeconfig file:
+    `cluster` is one entry of `clusters`, `user` is one entry of `users`, and `namespace` is the
+    namespace of the context.
+  type: object
+  additionalProperties: false
+  required:
+    - cluster
+    - user
+  examples:
+    - cluster:
+        server: https://203.0.113.10:6443
+        certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJkekNDQVIyZ0F3SUJBZ0lCQURBS0JnZ3Foa2pPUFFRREFqQWpNU0V3SHdZRFZRUUREQmhyTTNNdGMyVnkKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+      user:
+        token: eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6bWFzc2RyaXZlcjptYXNzZHJpdmVyIn0.c2lnbmF0dXJl
+      namespace: massdriver
+    - cluster:
+        server: https://ABCDEF0123456789ABCDEF0123456789.gr7.us-east-1.eks.amazonaws.com
+        certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJkekNDQVIyZ0F3SUJBZ0lCQURBS0JnZ3Foa2pPUFFRREFqQWpNU0V3SHdZRFZRUUREQmhyTTNNdGMyVnkKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+      user:
+        exec:
+          apiVersion: client.authentication.k8s.io/v1beta1
+          command: aws
+          args:
+            - eks
+            - get-token
+            - --cluster-name
+            - production
+            - --output
+            - json
+          env:
+            - name: AWS_REGION
+              value: us-east-1
+          interactiveMode: Never
+      namespace: default
+    - cluster:
+        server: https://192.0.2.20:6443
+        tls-server-name: kubernetes.default.svc
+        proxy-url: socks5://proxy.internal.example.com:1080
+      user:
+        client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJrVENDQVRlZ0F3SUJBZ0lJRmFrZUNlcnQKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+        client-key-data: LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUZha2VLZXkKLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=
+      namespace: apps
+  properties:
+    cluster:
+      title: Cluster
+      description: How to reach the API server and how to trust its certificate.
+      type: object
+      additionalProperties: false
+      required:
+        - server
+      properties:
+        server:
+          title: Server
+          description: URL of the API server, such as `https://203.0.113.10:6443`.
+          type: string
+          pattern: ^https://[^/?#\s]+[^\s]*$
+          examples:
+            - https://203.0.113.10:6443
+            - https://ABCDEF0123456789ABCDEF0123456789.gr7.us-east-1.eks.amazonaws.com
+        certificate-authority-data:
+          title: Certificate authority data
+          description: >-
+            The PEM certificate of the cluster's certificate authority, encoded as base64 on one
+            line. Leave it empty only when the API server uses a certificate that a public authority
+            signed.
+          type: string
+          pattern: ^LS0tLS1CRUdJTi[A-Za-z0-9+/]*={0,2}$
+          examples:
+            - LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJkekNDQVIyZ0F3SUJBZ0lCQURBS0JnZ3Foa2pPUFFRREFqQWpNU0V3SHdZRFZRUUREQmhyTTNNdGMyVnkKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+        tls-server-name:
+          title: TLS server name
+          description: >-
+            The name to check on the server certificate, when it is not the host in `server`. For
+            example, use it when you connect through an IP address or a tunnel.
+          type: string
+          pattern: ^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)*$
+          examples:
+            - kubernetes.default.svc
+        insecure-skip-tls-verify:
+          title: Skip TLS verification
+          description: >-
+            Do not check the server certificate. Anyone on the network path can then read and
+            change the traffic. Use it only for a test cluster. It cannot be used with certificate
+            authority data.
+          type: boolean
+          default: false
+        proxy-url:
+          title: Proxy URL
+          description: URL of an HTTP, HTTPS, or SOCKS5 proxy for requests to the API server.
+          type: string
+          pattern: ^(https?|socks5)://[^/?#\s]+[^\s]*$
+          examples:
+            - socks5://proxy.internal.example.com:1080
+      if:
+        required:
+          - insecure-skip-tls-verify
+        properties:
+          insecure-skip-tls-verify:
+            const: true
+      then:
+        not:
+          required:
+            - certificate-authority-data
+    user:
+      title: User
+      description: >-
+        How to authenticate to the API server. Use one method: a bearer token, a client
+        certificate and key, or an exec credential plugin.
+      type: object
+      additionalProperties: false
+      oneOf:
+        - title: Bearer token
+          required:
+            - token
+          not:
+            anyOf:
+              - required:
+                  - client-certificate-data
+              - required:
+                  - client-key-data
+              - required:
+                  - exec
+        - title: Client certificate
+          required:
+            - client-certificate-data
+            - client-key-data
+          not:
+            anyOf:
+              - required:
+                  - token
+              - required:
+                  - exec
+        - title: Exec plugin
+          required:
+            - exec
+          not:
+            anyOf:
+              - required:
+                  - token
+              - required:
+                  - client-certificate-data
+              - required:
+                  - client-key-data
+      properties:
+        token:
+          $md.sensitive: true
+          title: Token
+          description: Bearer token, such as the token of a Kubernetes ServiceAccount.
+          type: string
+          minLength: 1
+          pattern: ^[^\s]+$
+        client-certificate-data:
+          title: Client certificate data
+          description: The PEM client certificate, encoded as base64 on one line.
+          type: string
+          pattern: ^LS0tLS1CRUdJTi[A-Za-z0-9+/]*={0,2}$
+        client-key-data:
+          $md.sensitive: true
+          title: Client key data
+          description: The PEM private key of the client certificate, encoded as base64 on one line.
+          type: string
+          pattern: ^LS0tLS1CRUdJTi[A-Za-z0-9+/]*={0,2}$
+        exec:
+          title: Exec plugin
+          description: >-
+            A command that prints an ExecCredential with a token, such as `aws eks get-token`,
+            `gke-gcloud-auth-plugin`, or `kubelogin`. The command must be installed where the
+            kubeconfig is used.
+          type: object
+          additionalProperties: false
+          required:
+            - apiVersion
+            - command
+          properties:
+            apiVersion:
+              title: API version
+              description: Version of the ExecCredential that the command prints.
+              type: string
+              enum:
+                - client.authentication.k8s.io/v1
+                - client.authentication.k8s.io/v1beta1
+              default: client.authentication.k8s.io/v1beta1
+            command:
+              title: Command
+              description: The command to run. A name without a path is found on `PATH`.
+              type: string
+              minLength: 1
+              examples:
+                - aws
+                - gke-gcloud-auth-plugin
+                - kubelogin
+            args:
+              title: Arguments
+              description: Arguments of the command.
+              type: array
+              items:
+                type: string
+              examples:
+                - - eks
+                  - get-token
+                  - --cluster-name
+                  - production
+                  - --output
+                  - json
+            env:
+              title: Environment
+              description: Environment variables to set for the command.
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                required:
+                  - name
+                  - value
+                properties:
+                  name:
+                    title: Name
+                    description: Name of the environment variable.
+                    type: string
+                    pattern: ^[A-Za-z_][A-Za-z0-9_]*$
+                  value:
+                    $md.sensitive: true
+                    title: Value
+                    description: Value of the environment variable.
+                    type: string
+            interactiveMode:
+              title: Interactive mode
+              description: >-
+                Whether the command can ask for input. Use `Never` for automation, because a
+                deployment has no person to answer.
+              type: string
+              enum:
+                - Never
+                - IfAvailable
+                - Always
+              default: Never
+    namespace:
+      title: Namespace
+      description: >-
+        The default namespace for requests. For a token that can use only one namespace, set that
+        namespace.
+      type: string
+      maxLength: 63
+      pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+      default: default
+      examples:
+        - default
+        - massdriver

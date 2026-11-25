@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="WireGuard Tunnel">
+  <title>WireGuard Tunnel</title>
+  <rect width="64" height="64" rx="14" fill="#4F46E5"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 38H22M42 38H54"/>
+    <path d="M25 28V23A7 7 0 0 1 39 23V28"/>
+    <rect x="22" y="28" width="20" height="18" rx="4"/>
+    <circle cx="10" cy="38" r="2.5" fill="#FFFFFF" stroke="none"/>
+    <circle cx="54" cy="38" r="2.5" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

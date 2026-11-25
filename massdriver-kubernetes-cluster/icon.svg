@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Kubernetes Cluster">
+  <title>Kubernetes Cluster</title>
+  <rect width="64" height="64" rx="14" fill="#4F46E5"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="32.00,12.00 48.42,19.91 52.47,37.67 41.11,51.92 22.89,51.92 11.53,37.67 15.58,19.91"/>
+    <circle cx="32" cy="33" r="4"/>
+    <path d="M32.00 27.00L32.00 20.00M36.69 29.26L42.16 24.89M37.85 34.34L44.67 35.89M34.60 38.41L37.64 44.71M29.40 38.41L26.36 44.71M26.15 34.34L19.33 35.89M27.31 29.26L21.84 24.89"/>
+  </g>
+</svg>
