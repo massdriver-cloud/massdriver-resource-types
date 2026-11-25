@@ -39,9 +39,9 @@ jobs:
           sudo ip link add wg-validate type wireguard
           for file in "$RUNNER_TEMP"/rendered/*/*/wg0.conf; do
             echo "$file"
-            # Example endpoints use documentation hostnames that do not resolve.
-            sed -E 's/^Endpoint = [A-Za-z][^:]*:/Endpoint = 192.0.2.1:/' "$file" > "$RUNNER_TEMP/wg-validate.conf"
-            sudo wg-quick strip "$RUNNER_TEMP/wg-validate.conf" > "$RUNNER_TEMP/wg-stripped.conf"
-            sudo wg setconf wg-validate "$RUNNER_TEMP/wg-stripped.conf"
+            # Example endpoints use documentation hostnames that do not resolve. `wg` does not read the
+            # wg-quick keys (Address, DNS, MTU), so they are removed as `wg-quick strip` does.
+            sed -E -e 's/^Endpoint = [A-Za-z][^:]*:/Endpoint = 192.0.2.1:/' -e '/^(Address|DNS|MTU) = /d' "$file" \
+              | sudo wg setconf wg-validate /dev/stdin
           done
           sudo ip link delete wg-validate
