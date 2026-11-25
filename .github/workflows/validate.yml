@@ -42,6 +42,7 @@ jobs:
             # Example endpoints use documentation hostnames that do not resolve. `wg` does not read the
             # wg-quick keys (Address, DNS, MTU), so they are removed as `wg-quick strip` does.
             sed -E -e 's/^Endpoint = [A-Za-z][^:]*:/Endpoint = 192.0.2.1:/' -e '/^(Address|DNS|MTU) = /d' "$file" \
-              | sudo wg setconf wg-validate /dev/stdin
+              | sudo tee /etc/wireguard/wg-validate.conf > /dev/null
+            sudo wg setconf wg-validate /etc/wireguard/wg-validate.conf
           done
           sudo ip link delete wg-validate
