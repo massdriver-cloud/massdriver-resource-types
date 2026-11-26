@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Event Destination (HTTPS)">
-  <title>Event Destination (HTTPS)</title>
-  <rect width="64" height="64" rx="14" fill="#4F46E5"/>
-  <g fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M32 11V33M23 25L32 34L41 25"/>
-    <path d="M12 36V47A5 5 0 0 0 17 52H47A5 5 0 0 0 52 47V36"/>
-    <path d="M12 40H22L25 45H39L42 40H52"/>
-  </g>
-</svg>

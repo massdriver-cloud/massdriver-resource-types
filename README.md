@@ -7,7 +7,6 @@ Official [resource types](https://docs.massdriver.cloud/concepts/resources) for 
 | [`massdriver-service-account`](./massdriver-service-account) | <img src="./massdriver-service-account/icon.svg" width="32" alt=""> | Credentials of a Massdriver service account: `url`, `organization_id`, and `api_key`, the settings of the Massdriver CLI, Go SDK, and Terraform provider. | |
 | [`massdriver-kubernetes-cluster`](./massdriver-kubernetes-cluster) | <img src="./massdriver-kubernetes-cluster/icon.svg" width="32" alt=""> | Access to a Kubernetes API server, in kubeconfig format: `cluster`, `user` (token, client certificate, or exec plugin), and `namespace`. | `kubeconfig.yaml` |
 | [`massdriver-wireguard-tunnel`](./massdriver-wireguard-tunnel) | <img src="./massdriver-wireguard-tunnel/icon.svg" width="32" alt=""> | A WireGuard client configuration in wg-quick format, so that deployments can reach private networks of remote environments. | `wg0.conf` |
-| [`massdriver-event-destination-https`](./massdriver-event-destination-https) | <img src="./massdriver-event-destination-https/icon.svg" width="32" alt=""> | A Massdriver event destination that posts signed CloudEvents to an HTTPS URL, with its signing secret. | |
 
 Each directory has a `massdriver.yaml` with the JSON Schema of the type, instructions that Massdriver shows when you import a resource, and export templates.
 
@@ -19,7 +18,7 @@ You need the [Massdriver CLI](https://github.com/massdriver-cloud/mass) and a pr
 git clone https://github.com/massdriver-cloud/massdriver-resource-types.git
 cd massdriver-resource-types
 
-for type in massdriver-service-account massdriver-kubernetes-cluster massdriver-wireguard-tunnel massdriver-event-destination-https; do
+for type in massdriver-service-account massdriver-kubernetes-cluster massdriver-wireguard-tunnel; do
   mass resource-type create "$type"
   mass resource-type publish "$type"
 done
